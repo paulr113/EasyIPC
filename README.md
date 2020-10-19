@@ -1,6 +1,11 @@
 # EasyIPC
 Easy Inter Process Communication Wrapper for Electron
 
+Install:
+```shell
+$ npm i @paulr113/easyipc
+```
+
 Main process:
 ```js
 const  EasyIPC = require("@paulr113/easyipc");
