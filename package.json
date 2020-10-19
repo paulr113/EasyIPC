@@ -1,0 +1,24 @@
+{
+  "name": "easyipc",
+  "version": "1.0.0",
+  "description": "Easy Electron IPC",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/paulr113/EasyIPC.git"
+  },
+  "keywords": [
+    "electron",
+    "ipc",
+    "electronipc"
+  ],
+  "author": "paulr113",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/paulr113/EasyIPC/issues"
+  },
+  "homepage": "https://github.com/paulr113/EasyIPC#readme"
+}
