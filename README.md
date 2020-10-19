@@ -6,7 +6,7 @@ Main process:
 const  EasyIPC = require("@paulr113/easyipc");
 const ipc = new EasyIPC(require("electron")); 
 
-//Add actions
+//Add action
 ipc.addAction("test", (payload, res) => {
 	console.log("New request: test");
 	console.log(payload)
@@ -19,6 +19,7 @@ Render process:
 const  EasyIPC = require("@paulr113/easyipc");
 const ipc = new EasyIPC(require("electron")); 
 
+//Send request
 ipc.send("test").then((payload) => {
 	console.log("Response from main process");
 	console.log(payload)
