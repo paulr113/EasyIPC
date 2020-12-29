@@ -61,7 +61,15 @@ class EasyIPC {
             this.getIpc(this.electron).send("easyIPCMessage", requestId, action, payload);
         } else {
             this.windows.forEach((window) => {
-                window.webContents.send("easyIPCMessage", requestId, action, payload)
+                try {
+                    window.webContents.send("easyIPCMessage", requestId, action, payload)
+                } catch (error) {
+                    if (error == "TypeError: Object has been destroyed") {
+                        this.windows = this.windows.filter((w) => {
+                            return !w.isDestroyed();
+                        });
+                    } else throw error
+                }
             })
         }
 
