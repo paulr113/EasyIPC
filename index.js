@@ -6,8 +6,8 @@ class EasyIPC {
         this.pendingRequests = {};
         this.windows = [];
 
-        this.getIpc(electron).on("easyIPCMessage", (event, requestId, action, payload) => {
-            this.actionHandler(event, requestId, action, payload)
+        this.getIpc(electron).on("easyIPCMessage", (event, requestId, action, payload, noResponse) => {
+            this.actionHandler(event, requestId, action, payload, noResponse)
         })
 
         this.responseHandler(electron);
@@ -18,13 +18,13 @@ class EasyIPC {
         if (action != null && func != null) this.actions[action] = func;
     }
 
-    actionHandler(event, requestId, action, payload) {
+    actionHandler(event, requestId, action, payload, noResponse) {
         //console.log("New request: " + action + ":" + requestId);
 
         const res = {
-            notify: (msg) => event.sender.send("easyIPCResponseNotify", requestId, msg),
-            send: (res) => event.sender.send("easyIPCResponse", requestId, res),
-            error: (err) => event.sender.send("easyIPCErrorResponse", requestId, err)
+            notify: !noResponse ? (msg) => event.sender.send("easyIPCResponseNotify", requestId, msg) : () => { },
+            send: !noResponse ? (res) => event.sender.send("easyIPCResponse", requestId, res) : () => { },
+            error: !noResponse ? (err) => event.sender.send("easyIPCErrorResponse", requestId, err) : () => { }
         }
 
         if (this.actions[action] == null) return res.error({ error: "Action not implemented (" + action + ")" });
@@ -54,15 +54,15 @@ class EasyIPC {
 
     //-----------------------send-----------------------
 
-    send(action, payload, notifier) {
+    send(action, payload, noResponse = false, notifier) {
         const requestId = this.randomId();
 
         if (this.getProcessType() == "renderer") {
-            this.getIpc(this.electron).send("easyIPCMessage", requestId, action, payload);
+            this.getIpc(this.electron).send("easyIPCMessage", requestId, action, payload, noResponse);
         } else {
             this.windows.forEach((window) => {
                 try {
-                    window.webContents.send("easyIPCMessage", requestId, action, payload)
+                    window.webContents.send("easyIPCMessage", requestId, action, payload, noResponse)
                 } catch (error) {
                     if (error == "TypeError: Object has been destroyed") {
                         this.windows = this.windows.filter((w) => {
@@ -73,14 +73,18 @@ class EasyIPC {
             })
         }
 
-        const promise = new EasyPromise();
-        notifier = notifier || (() => {
-            console.warn("No notifier definded for the request: " + action + ":" + requestId);
-        })
+        if (!noResponse) {
+            const promise = new EasyPromise();
+            notifier = notifier || (() => {
+                console.warn("No notifier definded for the request: " + action + ":" + requestId);
+            })
 
-        this.pendingRequests[requestId] = { promise, action, payload, notifier };
+            this.pendingRequests[requestId] = { promise, action, payload, notifier };
 
-        return promise.promise;
+            return promise.promise;
+        } else {
+            return;
+        }
 
     }
 
