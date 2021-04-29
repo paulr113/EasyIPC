@@ -1,6 +1,6 @@
 {
   "name": "@paulr113/easyipc",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Easy Electron IPC",
   "main": "index.js",
   "scripts": {
