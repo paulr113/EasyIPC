@@ -132,7 +132,7 @@ class EasyIPC {
     }
 
     registerWindow({ window, name }) {
-        if (window != null && name != null) {
+        if (this.getWindowByName(name) == null && window != null && name != null) {
             this.windows.push({ window, name })
         }
     }
@@ -159,6 +159,7 @@ class EasyIPC {
         for (let i = 0; i < this.windows.length; i++) {
             if (this.windows[i].name == name) return this.windows[i];
         }
+        return null;
     }
 
     isPromise(obj) {
