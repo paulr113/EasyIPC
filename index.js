@@ -54,23 +54,38 @@ class EasyIPC {
 
     //-----------------------send-----------------------
 
-    send(action, payload, noResponse = false, notifier) {
+    send({ action, payload, noResponse, notifier, windowName }) {
+        noResponse = noResponse == null ? false : noResponse;
+
         const requestId = this.randomId();
 
         if (this.getProcessType() == "renderer") {
             this.getIpc(this.electron).send("easyIPCMessage", requestId, action, payload, noResponse);
         } else {
-            this.windows.forEach((window) => {
+            if (windowName != null) {
+                let window = this.getWindowByName(windowName);
                 try {
-                    window.webContents.send("easyIPCMessage", requestId, action, payload, noResponse)
+                    window.window.webContents.send("easyIPCMessage", requestId, action, payload, noResponse)
                 } catch (error) {
                     if (error == "TypeError: Object has been destroyed") {
                         this.windows = this.windows.filter((w) => {
-                            return !w.isDestroyed();
+                            return !w.window.isDestroyed();
                         });
                     } else throw error
                 }
-            })
+            } else {
+                this.windows.forEach((window) => {
+                    try {
+                        window.window.webContents.send("easyIPCMessage", requestId, action, payload, noResponse)
+                    } catch (error) {
+                        if (error == "TypeError: Object has been destroyed") {
+                            this.windows = this.windows.filter((w) => {
+                                return !w.window.isDestroyed();
+                            });
+                        } else throw error
+                    }
+                })
+            }
         }
 
         if (!noResponse) {
@@ -114,23 +129,37 @@ class EasyIPC {
             .filter(k => k !== requestId)
             .map(k => ({ [k]: this.pendingRequests[k] }))
             .reduce((accumulator, current) => ({ ...accumulator, ...current }), {});
-    };
+    }
 
-    registerWindow(window) {
-        if (window != null) {
-            this.windows.push(window);
+    registerWindow({ window, name }) {
+        if (window != null && name != null) {
+            this.windows.push({ window, name })
         }
     }
 
-    removeWindow(window) {
-        this.windows.forEach((w, i) => {
-            if (w == window) {
-                this.windows.splice(i, 1);
-            }
-        })
+    removeWindow({ window, name }) {
+        if (window != null) {
+            this.windows.forEach((w, i) => {
+                if (w.window == window) {
+                    this.windows.splice(i, 1);
+                }
+            })
+        } else if (name != null) {
+            this.windows.forEach((w, i) => {
+                if (w.name == name) {
+                    this.windows.splice(i, 1);
+                }
+            })
+        }
     }
 
     //-----------------------helperFunctions-----------------------
+
+    getWindowByName(name) {
+        for (let i = 0; i < this.windows.length; i++) {
+            if (this.windows[i].name == name) return this.windows[i];
+        }
+    }
 
     isPromise(obj) {
         return !!obj && (typeof obj === 'object' || typeof obj === 'function') && typeof obj.then === 'function';
