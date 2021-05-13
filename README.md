@@ -25,7 +25,7 @@ const  EasyIPC = require("@paulr113/easyipc");
 const ipc = new EasyIPC(require("electron")); 
 
 //Send request
-ipc.send("test").then((payload) => {
+ipc.send({action: "test"}).then((payload) => {
 	console.log("Response from main process");
 	console.log(payload)
 })
