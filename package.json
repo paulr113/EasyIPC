@@ -2,9 +2,11 @@
   "name": "@paulr113/easyipc",
   "version": "2.0.1",
   "description": "Easy Electron IPC",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "clean": "rimraf dist/",
+    "build": "tsc"
   },
   "repository": {
     "type": "git",
@@ -20,5 +22,11 @@
   "bugs": {
     "url": "https://github.com/paulr113/EasyIPC/issues"
   },
-  "homepage": "https://github.com/paulr113/EasyIPC#readme"
+  "homepage": "https://github.com/paulr113/EasyIPC#readme",
+  "devDependencies": {
+    "electron": "^25.4.0",
+    "rimraf": "^5.0.1",
+    "tsc": "^2.0.4",
+    "typescript": "^5.1.6"
+  }
 }
